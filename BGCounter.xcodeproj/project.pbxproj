@@ -6,11 +6,30 @@
 	objectVersion = 46;
 	objects = {
 
+/* Begin PBXFileReference section */
+		AB012E361ACE84F600640E15 /* sevenSegment.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = sevenSegment.cpp; path = ../libraries/sevenSegment/sevenSegment.cpp; sourceTree = "<group>"; };
+		AB012E371ACE84F600640E15 /* sevenSegment.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = sevenSegment.h; path = ../libraries/sevenSegment/sevenSegment.h; sourceTree = "<group>"; };
+		AB012E3A1AD137DA00640E15 /* BGCounter.ino */ = {isa = PBXFileReference; lastKnownFileType = text; path = BGCounter.ino; sourceTree = "<group>"; };
+		AB012E3C1AD1387000640E15 /* BGCounterSR.ino */ = {isa = PBXFileReference; lastKnownFileType = text; name = BGCounterSR.ino; path = BGCounterSR/BGCounterSR.ino; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
 /* Begin PBXGroup section */
 		AB012E2F1ACE84E200640E15 = {
 			isa = PBXGroup;
 			children = (
+				AB012E3A1AD137DA00640E15 /* BGCounter.ino */,
+				AB012E3C1AD1387000640E15 /* BGCounterSR.ino */,
+				AB012E391ACE854C00640E15 /* sevenSegment library */,
 			);
+			sourceTree = "<group>";
+		};
+		AB012E391ACE854C00640E15 /* sevenSegment library */ = {
+			isa = PBXGroup;
+			children = (
+				AB012E361ACE84F600640E15 /* sevenSegment.cpp */,
+				AB012E371ACE84F600640E15 /* sevenSegment.h */,
+			);
+			name = "sevenSegment library";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
