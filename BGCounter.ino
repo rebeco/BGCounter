@@ -7,7 +7,7 @@ sevenSegment4d12p counter4d(8, 9, 10, 4, 5, 6, 7, true); // latch,clock,data,dig
 // -- Time counter and 7segment display --//
 
 unsigned long milliseconds;
-unsigned long totalMillis;
+unsigned long totalMillis = 0;
 unsigned long millisPerPlayer[5] = {0, 0, 0, 0, 0};
 unsigned long newStartTotal;
 unsigned long newStartPerPlayer[5] = {0, 0, 0, 0, 0};
@@ -39,8 +39,8 @@ int encoderBrake = 3;
 int lastMSB = 0;
 int lastLSB = 0;
 
-int valueRotary;
-int lastValueRotary;
+long int valueRotary;
+long int lastValueRotary;
 
 int encoderPinButton = 11;
 
@@ -54,11 +54,12 @@ int buzzerPin = 12;
 int settingStep = 1;
 int counterMode = 1;
 int running = 0;
-int lastMode = 4; // it has 1,2,3,4 modes
+int lastMode = 3; // it has 1,2,3 modes
 
 bool pause = true;
 int pauseDisplay = 0;
 unsigned long pauseTime;
+unsigned long staticPauseTime;
 
 // --------------- //
 
@@ -93,6 +94,11 @@ int activePlayer;
 
 // ------------- //
 
+// -- Alarm -- //
+
+unsigned long timeLastAlarm = 0;
+
+// ----------- //
 
 
 
@@ -159,7 +165,7 @@ void loop() {
         
         if (readEncoderButton()) {
             
-            for (int n=0; n<4000; n++) drawDigit(4,counterMode);
+            for (int n=0; n<3000; n++) drawDigit(4,counterMode);
             settingStep = 2;
         }
     }
@@ -167,99 +173,79 @@ void loop() {
     if (settingStep == 2) {
         // We are setting color players
         
-        if (counterMode == 1 || counterMode == 2) {
+        if (milliseconds%1000 > 500) allPlayerLeds(HIGH);
+        else for (int n=0; n<5 ; n++) if (!players[n]) playerLed(n+1, LOW);
+        
+        readButton = readAnalogButtons();
+        
+        if (players[readButton-1] == false) players[readButton-1] = true;
+        else players[readButton-1] = false;
+        
+        if (readEncoderButton()) {
+            bool thereArePlayers = false;
             
-            if (milliseconds%1000 > 500) allPlayerLeds(HIGH);
-            else for (int n=0; n<5 ; n++) if (!players[n]) playerLed(n+1, LOW);
-          
-            readButton = readAnalogButtons();
+            for (int n=0; n<5; n++) if (players[n]) thereArePlayers = true;
             
-            if (players[readButton-1] == false) players[readButton-1] = true;
-            else players[readButton-1] = false;
-            
-            if (readEncoderButton()) {
-                bool thereArePlayers = false;
-                
-                for (int n=0; n<5; n++) if (players[n]) thereArePlayers = true;
-            
-                if (thereArePlayers) {
-                    settingStep = 0; // Mode 1 and 2 don't need more settings.
+            if (thereArePlayers) {
+                if (counterMode == 1) {
+                    settingStep = 0; // Mode 1 don't need more settings.
                     
                     for (int n=0; n<5; n++) if (players[n]) millisPerPlayer[n] = 0; // Time ascending
-    
-                    totalMillis = 0;
+                    
                     running = 1;
-                    
-                    // Reset encoder
-                    valueRotary = 0;
-                    lastValueRotary = 0;
-                    encoderValue = 0;
-                    
+                    totalMillis = 0; // Reset for acumulate total play time
                     newStartTotal = milliseconds; // Set the init time
                 }
+                
+                if (counterMode == 2) settingStep = 3;
+                
+                resetEncoder();
             }
         }
     }
     
     if (settingStep == 3) {
-        // We are setting init time
+        // We are setting init time for mode 2
         
+        valueRotary = encoderValue/encoderBrake;
         
+        if (valueRotary < 0) {
+            valueRotary = 0;
+            encoderValue = encoderBrake;
+        }
+        
+        lastValueRotary = valueRotary;
+        lastEncoderValue = encoderValue;
+        
+        totalMillis = valueRotary*60000;
+        
+        drawClock(totalMillis, true);
+        
+        if (readEncoderButton()) {
+            if (counterMode == 2) {
+                settingStep = 0; // Mode 2 don't need more settings.
+                for (int n=0; n<5; n++) if (players[n]) millisPerPlayer[n] = totalMillis; // Time descending
+                
+                running = 1;
+                totalMillis = 0; // Reset for acumulate total play time
+                newStartTotal = milliseconds; // Set the init time
+            }
+            if (counterMode == 3) settingStep = 4;
+            
+            resetEncoder();
+        }
     }
     
- 
-    if (running && (counterMode == 1 || counterMode == 2)) {
-        // Executing time ascending
+    if (running) {
         
-        if (counterMode == 2) totalMillis = milliseconds - newStartTotal; // Always count the total play time in counter mode 2
+        totalMillis = milliseconds - newStartTotal; // Always count total play time
         
         if (pause) {
-            
-            // Rotate over total and player times. pauseDisplay=0 shows total time, other shows player time
-            valueRotary = encoderValue/encoderBrake;
-            
-            if (valueRotary > lastValueRotary) {
-                int n = pauseDisplay+1;
-                if (n == 6) pauseDisplay = 0;
-                else {
-                    while (true) {
-                        if (players[n-1]) {
-                            pauseDisplay=n;
-                            break;
-                        }
-                        else if (n == 5) {
-                            pauseDisplay = 0;
-                            break;
-                        }
-                        n++;
-                    }
-                }
-            }
-            else if (valueRotary < lastValueRotary) {
-                int n = pauseDisplay-1;
-                if (n == 0) pauseDisplay = 0;
-                else {
-                    if (n == -1) n = 5;
-                    while (true) {
-                        if (n == 0) {
-                            pauseDisplay = 0;
-                            break;
-                        }
-                        else if (players[n-1]) {
-                            pauseDisplay=n;
-                            break;
-                        }
-                        n--;
-                    }
-                }
-            }
-            
-            lastValueRotary = valueRotary;
-            lastEncoderValue = encoderValue;
+            pauseDisplay = calculatePauseMode();
             
             if (pauseDisplay == 0) {
                 activatePlayersLeds(); // Display all players
-                pauseTime = totalMillis;
+                pauseTime = staticPauseTime;
             }
             else {
                 allPlayerLeds(LOW);
@@ -273,8 +259,13 @@ void loop() {
             
             // Pause all counters
             newStartTotal = milliseconds - totalMillis;
-            for (int n=0; n<5; n++) if (players[n]) newStartPerPlayer[n] = milliseconds - millisPerPlayer[n];
-        
+            for (int n=0; n<5; n++) {
+                if (players[n]) {
+                    if (counterMode == 1) newStartPerPlayer[n] = milliseconds - millisPerPlayer[n];
+                    if (counterMode == 2) newStartPerPlayer[n] = milliseconds;
+                }
+            }
+            
             readButton = readAnalogButtons();
             if (readButton != 0 && players[readButton-1]) {
                 activePlayer = readButton;
@@ -282,34 +273,106 @@ void loop() {
                 pause = false;
             }
             
+
         }
         else {
-            // Active player counts
+            // Active player playing
+            
             activatePlayersLeds();
             
-            if (counterMode == 1) totalMillis = milliseconds - newStartTotal; // Only count the total play time if it's not in pause mode and in counter mode 1
-            millisPerPlayer[activePlayer-1] = milliseconds - newStartPerPlayer[activePlayer-1];
+            if (counterMode == 1) {
+                millisPerPlayer[activePlayer-1] = milliseconds - newStartPerPlayer[activePlayer-1];
+            }
+            if (counterMode == 2) {
+                if (milliseconds - newStartPerPlayer[activePlayer-1] > millisPerPlayer[activePlayer-1]) millisPerPlayer[activePlayer-1] = 0;
+                else millisPerPlayer[activePlayer-1] -= milliseconds - newStartPerPlayer[activePlayer-1];
+                
+                newStartPerPlayer[activePlayer-1] = milliseconds;
+                
+                // Alarms
+                if (millisPerPlayer[activePlayer-1] > 590000 && millisPerPlayer[activePlayer-1] < 600000) alarm(1); // From 9:50 to 10:00
+                if (millisPerPlayer[activePlayer-1] > 295000 && millisPerPlayer[activePlayer-1] < 300000) alarm(1); // From 4:55 to 5:00
+                if (millisPerPlayer[activePlayer-1] > 10000 && millisPerPlayer[activePlayer-1] < 60000) alarm(2); // From 0:10 to 1:00
+                if (millisPerPlayer[activePlayer-1] > 0 && millisPerPlayer[activePlayer-1] < 10000) alarm(3); // From 0:00 to 0:10
+            }
             
             colon = true;
             if (milliseconds%1000 > 500) colon = false;
+            drawClock(millisPerPlayer[activePlayer-1], colon);
             
             if (milliseconds%1000 < 500) playerLed(activePlayer, LOW); // Blink active player
             
-            drawClock(millisPerPlayer[activePlayer-1], colon);
-            
             for (int n=0; n<5; n++) { // Pause for all players except active player
-                if (n != activePlayer-1) newStartPerPlayer[n] = milliseconds - millisPerPlayer[n];
+                if (n != activePlayer-1) {
+                    if (counterMode == 1) newStartPerPlayer[n] = milliseconds - millisPerPlayer[n];
+                    if (counterMode == 2) newStartPerPlayer[n] = milliseconds;
+                }
             }
             
             readButton = readAnalogButtons();
             if (readButton != 0 && players[readButton-1]) {  // Change active player
                 activePlayer = readButton;
             }
-            if (readEncoderButton()) pause = true; // Pause
+            
+            if (readEncoderButton()) { // Pause
+                pause = true;
+                staticPauseTime = totalMillis;
+            }
         }
     }
 }
 
+
+void resetEncoder() {
+    valueRotary = 0;
+    lastValueRotary = 0;
+    encoderValue = 0;
+}
+
+int calculatePauseMode() {
+    // Rotate over total and player times. pauseDisplay=0 shows total time, other shows player time
+    valueRotary = encoderValue/encoderBrake;
+    
+    if (valueRotary > lastValueRotary) {
+        int n = pauseDisplay+1;
+        if (n == 6) pauseDisplay = 0;
+        else {
+            while (true) {
+                if (players[n-1]) {
+                    pauseDisplay=n;
+                    break;
+                }
+                else if (n == 5) {
+                    pauseDisplay = 0;
+                    break;
+                }
+                n++;
+            }
+        }
+    }
+    else if (valueRotary < lastValueRotary) {
+        int n = pauseDisplay-1;
+        if (n == 0) pauseDisplay = 0;
+        else {
+            if (n == -1) n = 5;
+            while (true) {
+                if (n == 0) {
+                    pauseDisplay = 0;
+                    break;
+                }
+                else if (players[n-1]) {
+                    pauseDisplay=n;
+                    break;
+                }
+                n--;
+            }
+        }
+    }
+    lastValueRotary = valueRotary;
+    lastEncoderValue = encoderValue;
+    
+    return pauseDisplay;
+}
 
 
 void drawDigit(int digit, int value) {
@@ -367,6 +430,7 @@ void drawClock (unsigned long timeToDraw, bool colon) {
 }
 
 void allPlayerLeds (int value) {
+    // Value is HIGH or LOW
     for (int n=0; n<5 ; n++) digitalWrite(playersPinLed[n], value);
 }
 
@@ -375,6 +439,7 @@ void activatePlayersLeds () {
 }
 
 void playerLed (int player, int value) {
+    // Value is HIGH or LOW
     for (int n=0; n<5 ; n++) if (player == n+1) digitalWrite(playersPinLed[n], value);
 }
 
@@ -415,6 +480,20 @@ void buzzer() {
     digitalWrite(buzzerPin, LOW);
 }
 
+void alarm(int level) {
+    int wait;
+    int length = 100;
+    
+    if (level == 1) wait = 1000;
+    if (level == 2) wait = 500;
+    if (level == 3) wait = 250;
+    
+    if (milliseconds > timeLastAlarm + wait) {
+        digitalWrite(buzzerPin, HIGH);
+        timeLastAlarm = milliseconds;
+    }
+    if (milliseconds > timeLastAlarm + length)  digitalWrite(buzzerPin, LOW);
+}
 
 void updateEncoder()
 {
