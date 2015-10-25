@@ -1,7 +1,7 @@
 #include <sevenSegment4d12p.h>
 
 
-sevenSegment4d12p counter4d(8, 9, 10, 4, 5, 6, 7, true); // latch,clock,data,digit1,digit2,digit3,digit4,inverse
+sevenSegment4d12p counter4d(8, 9, 10, 4, 5, 6, 7, true); // latch,clock,data,digit1,digit2,digit3,digit4,common anode
 
 
 // -- Time counter and 7segment display --//
