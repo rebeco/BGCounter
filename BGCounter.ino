@@ -217,10 +217,18 @@ void loop() {
             encoderValue = encoderBrake;
         }
         
+        unsigned int increment;
+        
+        if (totalMillis < 180000) increment = 30000;
+        else increment = 60000;
+        
+        if (valueRotary > lastValueRotary) totalMillis += increment;
+        if (valueRotary < lastValueRotary) totalMillis -= increment;
+        
+        
         lastValueRotary = valueRotary;
         lastEncoderValue = encoderValue;
-        
-        totalMillis = valueRotary*60000;
+
         
         drawClock(totalMillis, true);
         
@@ -233,6 +241,8 @@ void loop() {
                 running = 1;
                 totalMillis = 0; // Reset for acumulate total play time
                 newStartTotal = milliseconds; // Set the init time
+                
+                delay(500);
             }
             
             if (counterMode == 3) settingStep = 4;
@@ -249,10 +259,16 @@ void loop() {
             encoderValue = encoderBrake;
         }
         
+        unsigned int increment;
+        
+        if (timeAdded < 180000) increment = 30000;
+        else increment = 60000;
+        
+        if (valueRotary > lastValueRotary) timeAdded += increment;
+        if (valueRotary < lastValueRotary) timeAdded -= increment;
+        
         lastValueRotary = valueRotary;
         lastEncoderValue = encoderValue;
-        
-        timeAdded = valueRotary*60000;
         
         drawClock(timeAdded, true);
 
