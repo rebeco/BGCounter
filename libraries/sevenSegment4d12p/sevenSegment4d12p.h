@@ -12,9 +12,9 @@ class sevenSegment4d12p
 {
 public:
     sevenSegment4d12p(int latchPin, int clockPin, int dataPin, int digit1, int digit2, int digit3, int digit4, boolean comAnode = false); // Constructor
-    si void prepareNumber(int number, boolean withDot = false);
-    no void prepareNoNumber(void);
-    no void allDeactivate(void);
+    void prepareNumber(int number, boolean withDot = false);
+    void prepareNoNumber(void);
+    void allDeactivate(void);
     void allActivate(void);
     void activateDigit(int digit);
     void deactivateDigit(int digit);
@@ -56,5 +56,4 @@ private:
         B00011001, // 9
     };
 };
-
 #endif

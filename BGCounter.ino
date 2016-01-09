@@ -133,7 +133,6 @@ void setup() {
   for (int n = 0; n < 1000; n++) drawClock(0, true);
   allPlayerLeds(LOW);
   buzzer();
-
 }
 
 void loop() {
