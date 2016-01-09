@@ -8,30 +8,16 @@
 
 /* Begin PBXFileReference section */
 		AB012E3A1AD137DA00640E15 /* BGCounter.ino */ = {isa = PBXFileReference; lastKnownFileType = text; path = BGCounter.ino; sourceTree = "<group>"; };
-		AB202FC51B64F0DC007A4B3F /* sevenSegment4d12p.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = sevenSegment4d12p.cpp; path = ../libraries/sevenSegment4d12p/sevenSegment4d12p.cpp; sourceTree = "<group>"; };
-		AB202FC61B64F0DC007A4B3F /* sevenSegment4d12p.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = sevenSegment4d12p.h; path = ../libraries/sevenSegment4d12p/sevenSegment4d12p.h; sourceTree = "<group>"; };
-		ABCF4CC41BAB2722001F3888 /* example4d12p.ino */ = {isa = PBXFileReference; lastKnownFileType = text; name = example4d12p.ino; path = ../example4d12p/example4d12p.ino; sourceTree = "<group>"; };
-		ABCF4CC51BB04AD1001F3888 /* BGCounterSR.ino */ = {isa = PBXFileReference; lastKnownFileType = text; name = BGCounterSR.ino; path = BGCounterSR/BGCounterSR.ino; sourceTree = "<group>"; };
+		AB5B86E41C40FAF500D4AAC1 /* libraries */ = {isa = PBXFileReference; lastKnownFileType = folder; path = libraries; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
 		AB012E2F1ACE84E200640E15 = {
 			isa = PBXGroup;
 			children = (
-				AB294B7C1B0509B40020CF9B /* libraries */,
+				AB5B86E41C40FAF500D4AAC1 /* libraries */,
 				AB012E3A1AD137DA00640E15 /* BGCounter.ino */,
-				ABCF4CC41BAB2722001F3888 /* example4d12p.ino */,
-				ABCF4CC51BB04AD1001F3888 /* BGCounterSR.ino */,
 			);
-			sourceTree = "<group>";
-		};
-		AB294B7C1B0509B40020CF9B /* libraries */ = {
-			isa = PBXGroup;
-			children = (
-				AB202FC51B64F0DC007A4B3F /* sevenSegment4d12p.cpp */,
-				AB202FC61B64F0DC007A4B3F /* sevenSegment4d12p.h */,
-			);
-			name = libraries;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
